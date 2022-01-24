@@ -1,0 +1,29 @@
+Copland Boot Notes
+
+Applies to D11E4, other versions not checked.
+
+The Copland installer requires that System 7.5 is already installed (and that
+the system file is named "System"), but does not otherwise depend on nor alter
+the existing System Folder.
+
+At the filesystem level, the installer copies "Mac OS Folder" and "Mac OS 8
+Applications" to the root.
+
+The 4-byte catalog node ID of the Mac OS Folder is placed at offset 0x14 in the
+volume Finder info (which itself is at offset 0x45c in the HFS partition). This
+is a previously unused field in a data structure that also contains the CNIDs of
+the System Folder, the folder to open at startup, and the folder containing the
+pre-MultiFinder startup app.
+
+The 'boot' 1 resource of Mac OS Loader is copied to the boot blocks. It differs
+from the boot blocks of System 7.1 and later as follows:
+	0x15e-0x162:
+		"move.l 0x6e(a0),d6" saves the Mac OS Folder CNID for later
+	0x186-0x1e6:
+		NuKernel booting path...
+		0x186-0x1aa: check for compatible hardware, else jump to original code
+		0x1aa-0x1b2: check caps lock, else jump to original code
+		0x1b2-0x1e6: execute 'nkld' 128 resource in Mac OS Loader
+
+Note that the boot blocks would get overridden if the volume was re-blessed in
+traditional Mac OS. But this could be fixed if it becomes annoying.
